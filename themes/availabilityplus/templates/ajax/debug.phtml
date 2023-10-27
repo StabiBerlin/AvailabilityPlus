@@ -1,0 +1,32 @@
+<button class="accordion">
+    <?php if ($debug['check_type']) ?> <?=$debug['check_type'].' - '?>
+    <?=$debug['check']?>
+    <?php if (!empty($debug['SolrMarcKey']) && $debug['check'] !== $debug['SolrMarcKey']) ?> <?=' - SorlMarcKey: '.$debug['SolrMarcKey']?>
+    <?php if (!empty($debug['status'])) ?> <?=' - <span class="'.$debug['status']['level'].'">'.$this->transEsc('AvailabilityPlus::'.$debug['status']['label']).'</span>'?>
+</button>
+
+<div class="panel">
+    <?php
+        print "<pre>";
+        print_r($debug);
+        print "</pre>";
+    ?>
+</div>
+
+<script>
+    var acc = document.getElementsByClassName("accordion");
+    var i;
+
+    for (i = 0; i < acc.length; i++) {
+        acc[i].outerHTML = acc[i].outerHTML; //removes all EventListeners
+        acc[i].addEventListener("click", function () {
+            this.classList.toggle("active");
+            var panel = this.nextElementSibling;
+            if (panel.style.display === "block") {
+                panel.style.display = "none";
+            } else {
+                panel.style.display = "block";
+            }
+        });
+    }
+</script>

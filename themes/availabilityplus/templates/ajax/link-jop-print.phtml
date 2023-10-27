@@ -1,0 +1,21 @@
+<?php foreach ($data as $result): ?>
+    <?php if (!empty($result['label'])): ?>
+        <?php if (!$list): ?>
+            <div class="availability_item">
+            <?php endif; ?>
+            <?php
+                $level = $result['level'];
+                $label = $result['label'];
+                $url = $result['url'];
+            ?>
+            <div class="delimiter"></div>
+            <a href="<?=$url?>" class="<?=$level?> link_external" title="<?=$this->transEsc('AvailabilityPlus::'.$label)?>" target="_blank">
+                <?=$this->transEsc('AvailabilityPlus::'.$label)?>
+            </a>
+            <br/>
+        <?php if (!$list): ?>
+            </div>
+        <?php endif; ?>
+        <?php if ($mode == 'break_on_first') break; ?>
+    <?php endif; ?>
+<?php endforeach; ?>
