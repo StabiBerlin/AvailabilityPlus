@@ -112,57 +112,35 @@ VuFind.register('itemStatuses', function ItemStatuses() {
         }
     }
 
-    function itemQueueAjax(id, el) {
-        if (el.hasClass('js-item-pending')) {
+    function checkItemStatus(item) {
+        let id = $(item).attr('data-id');
+        if ($(item).hasClass('js-item-pending')) {
             return;
         }
         clearTimeout(itemStatusTimer);
         itemStatusIds.push(id);
-        itemStatusEls[id] = el;
-        let item = $(el);
-        itemFullData = item.attr('data-full');
-        itemStatusSource = item.attr('data-src');
-        itemStatusList = item.attr('data-list') == 1;
-        itemStatusMediatype = item.attr('data-mediatype');
-        itemLanguage = item.attr('data-language');
-        itemStatusDebug = item.attr('data-debug');
-        itemStatusTestCase = item.attr('data-testcase');
+        itemStatusEls[id] = $(item);
+        itemFullData = $(item).attr('data-full');
+        itemStatusSource = $(item).attr('data-src');
+        itemStatusList = $(item).attr('data-list') == 1;
+        itemStatusMediatype = $(item).attr('data-mediatype');
+        itemLanguage = $(item).attr('data-language');
+        itemStatusDebug = $(item).attr('data-debug');
+        itemStatusTestCase = $(item).attr('data-testcase');
         itemStatusTimer = setTimeout(runItemAjaxForQueue, itemStatusDelay);
-        el.addClass('js-item-pending').removeClass('hidden');
-        el.find('.callnumAndLocation').removeClass('hidden');
-        el.find('.callnumAndLocation .ajax-availability').removeClass('hidden');
-        el.find('.status').removeClass('hidden');
+        $(item).addClass('js-item-pending').removeClass('hidden');
+        $(item).find('.callnumAndLocation').removeClass('hidden');
+        $(item).find('.callnumAndLocation .ajax-availability').removeClass('hidden');
+        $(item).find('.status').removeClass('hidden');
     }
 
-    function checkItemStatuses() {
-        $('.availabilityItem').each(function () {
-            if ($(this).offsetTop < $(window).scrollTop() + $(window).height() && $(this).offset().top + $(this).height() >= $(window).scrollTop() && $(this).find('.ajax-availability').length !== 0) {
-                let id = $(this).attr('data-id');
-                itemFullData = $(this).attr('data-full');
-                itemStatusSource = $(this).attr('data-src');
-                itemStatusList = $(this).attr('data-list') == 1;
-                itemStatusMediatype = $(this).attr('data-mediatype');
-                itemLanguage = $(this).attr('data-language');
-                itemStatusDebug = $(this).attr('data-debug');
-                itemStatusTestCase = $(this).attr('data-testcase');
-                itemQueueAjax(id, $(this));
-            }
-        });
+    function checkAllItemStatuses(container = document) {
+        container.querySelectorAll('.availabilityItem').forEach(checkItemStatus);
     }
 
     // usage for list-view "tabs"
-    function checkDetailItemStatuses() {
-        $('.availabilityItem.detailItem').each(function () {
-            let id = $(this).attr('data-id');
-            itemFullData = $(this).attr('data-full');
-            itemStatusSource = $(this).attr('data-src');
-            itemStatusList = $(this).attr('data-list') == 1;
-            itemStatusMediatype = $(this).attr('data-mediatype');
-            itemLanguage = $(this).attr('data-language');
-            itemStatusDebug = $(this).attr('data-debug');
-            itemStatusTestCase = $(this).attr('data-testcase');
-            itemQueueAjax(id, $(this));
-        });
+    function checkDetailview(id) {
+        checkItemStatus('.availabilityItem.detailItem[data-id="' + id + '"]');
     }
 
     function initDaiaPlusOverlay() {
@@ -173,21 +151,21 @@ VuFind.register('itemStatuses', function ItemStatuses() {
         });
     }
 
-    function init(_container) {
-        if (typeof Hunt === 'undefined' || VuFind.isPrinting()) {
-            checkItemStatuses(_container);
+    function init($container = document) {
+        const container = unwrapJQuery($container);
+
+        if (VuFind.isPrinting()) {
+            checkAllItemStatuses(container);
         } else {
-            var container = typeof _container === 'undefined' ? document.body : _container;
-            new Hunt($(container).find('.ajaxItem').toArray(), {
-                enter: checkItemStatuses,
-            });
+            VuFind.observerManager.createIntersectionObserver('itemStatuses', checkItemStatus, container.querySelectorAll('.availabilityItem'));
         }
     }
 
     return {
         init,
-        check: checkItemStatuses,
-        checkDetail: checkDetailItemStatuses,
+        check: checkAllItemStatuses,
+        checkRecord: checkItemStatus,
+        checkDetailview,
         initDaiaPlusOverlay,
     };
 });

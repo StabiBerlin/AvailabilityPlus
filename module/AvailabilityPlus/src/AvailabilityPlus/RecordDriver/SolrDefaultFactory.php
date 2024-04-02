@@ -1,8 +1,10 @@
 <?php
 namespace AvailabilityPlus\RecordDriver;
 
-use Interop\Container\ContainerInterface;
 use VuFind\RecordDriver\AbstractBaseFactory;
+use Psr\Container\ContainerExceptionInterface as ContainerException;
+use Psr\Container\ContainerInterface;
+
 
 /**
  * Factory for SolrDefault record drivers.

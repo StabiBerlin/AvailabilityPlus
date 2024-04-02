@@ -3,7 +3,7 @@ namespace AvailabilityPlus\Resolver\Driver;
 
 use VuFind\Config\SearchSpecsReader;
 use VuFind\Crypt\HMAC;
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Laminas\Mvc\Controller\Plugin\Url;
 
 class AvailabilityPlusResolver extends \VuFind\Resolver\Driver\AbstractBase
