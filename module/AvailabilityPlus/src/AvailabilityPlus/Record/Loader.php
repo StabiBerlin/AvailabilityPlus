@@ -3,6 +3,7 @@
 namespace AvailabilityPlus\Record;
 
 use VuFind\Exception\RecordMissing as RecordMissingException;
+use VuFindSearch\Command\RetrieveCommand;
 use VuFindSearch\ParamBag;
 
 class Loader extends \VuFind\Record\Loader
@@ -41,32 +42,38 @@ class Loader extends \VuFind\Record\Loader
 
         if (null !== $id && '' !== $id) {
             $results = [];
-            if (null !== $this->recordCache
+            if (
+                null !== $this->recordCache
                 && $this->recordCache->isPrimary($source)
             ) {
                 $results = $this->recordCache->lookup($id, $source);
             }
             if (empty($results)) {
                 try {
-                    $results = $this->searchService->retrieve($source, $id, $params)
-                        ->getRecords();
+                    $command = new RetrieveCommand($source, $id, $params);
+                    $results = $this->searchService->invoke($command)->getResult()->getRecords();
                 } catch (BackendException $e) {
                     if (!$tolerateMissing) {
                         throw $e;
                     }
                 }
             }
-            if (empty($results) && null !== $this->recordCache
+            if (
+                empty($results) && null !== $this->recordCache
                 && $this->recordCache->isFallback($source)
             ) {
                 $results = $this->recordCache->lookup($id, $source);
+                if (!empty($results)) {
+                    $results[0]->setExtraDetail('cached_record', true);
+                }
             }
 
             if (!empty($results)) {
                 return $results[0];
             }
 
-            if ($this->fallbackLoader
+            if (
+                $this->fallbackLoader
                 && $this->fallbackLoader->has($source)
             ) {
                 try {
@@ -87,7 +94,7 @@ class Loader extends \VuFind\Record\Loader
         if ($tolerateMissing) {
             $record = $this->recordFactory->get('Missing');
             $record->setRawData(['id' => $id]);
-            $record->setSourceIdentifier($source);
+            $record->setSourceIdentifiers($source);
             return $record;
         }
         throw new RecordMissingException(
