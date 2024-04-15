@@ -3,11 +3,18 @@ namespace AvailabilityPlus\Resolver\Driver;
 
 use VuFind\Config\SearchSpecsReader;
 use VuFind\Crypt\HMAC;
-use VuFind\Record\Loader;
+use Interop\Container\ContainerInterface;
 use Laminas\Mvc\Controller\Plugin\Url;
 
 class AvailabilityPlusResolver extends \VuFind\Resolver\Driver\AbstractBase
 {
+    /**
+     * Service manager
+     *
+     * @var ContainerInterface
+     */
+    protected $serviceLocator;
+
     /**
      * HTTP client
      *
@@ -33,8 +40,9 @@ class AvailabilityPlusResolver extends \VuFind\Resolver\Driver\AbstractBase
      * @param string            $baseUrl    Base URL for link resolver
      * @param \Laminas\Http\Client $httpClient HTTP client
      */
-    public function __construct($baseUrl, \Laminas\Http\Client $httpClient, $additionalParams, $rules, HMAC $hmac, $resolverConfig, Url $urlHelper) {
+    public function __construct(ContainerInterface $sm, $baseUrl, \Laminas\Http\Client $httpClient, $additionalParams, $rules, HMAC $hmac, $resolverConfig, Url $urlHelper) {
         parent::__construct($baseUrl);
+        $this->serviceLocator = $sm;
         $this->httpClient = $httpClient;
         $this->additionalParams = $additionalParams;
         $this->rules = $rules;
@@ -205,5 +213,15 @@ class AvailabilityPlusResolver extends \VuFind\Resolver\Driver\AbstractBase
 
     public function setLanguage($language = 'en') {
         $this->language = $language;
+    }
+
+    /**
+     * Get a configuration.
+     * 
+     * @param string $id Configuration identifier (default = availabilityplus-resolver)
+     */
+    public function getConfig($id = 'availabilityplus-resolver') {
+        return $this->serviceLocator
+            ->get(\VuFind\Config\PluginManager::class)->get($id);
     }
 }

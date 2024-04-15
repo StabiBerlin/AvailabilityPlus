@@ -29,6 +29,7 @@ class DriverWithHttpClientFactory extends \VuFind\Resolver\Driver\DriverWithHttp
         $resolverName = $splittedResolverPath[count($splittedResolverPath) - 1];
 
         return new $requestedName(
+            $container,
             $config['ResolverBaseURL'][$resolverName],
             $container->get('VuFindHttp\HttpService')->createClient(),
             $config['ResolverExtraParams'][$resolverName],
