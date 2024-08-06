@@ -104,7 +104,7 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses implements Tra
             $check_mode = 'continue';
             try {
                 // do not make another solr request except for testcases
-                if (!$this->testcase) {
+                if (!empty($solrData)) {
                     $this->driver = $this->recordLoader->load($id, $this->source, false, null, true, $solrData);
                 } else {
                     $this->driver = $this->recordLoader->load($id, $this->source);
