@@ -207,7 +207,7 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses implements Tra
     protected function performAvailabilityCheck($check) {
         if (method_exists($this, $check)) {
             $responses = $this->{$check}();
-        } elseif (in_array($check,$this->driver->getSolrMarcKeys('resolver'))) {
+        } elseif (in_array($check, $this->driver->getSolrMarcKeys('resolver'))) {
             $responses = $this->getResolverResponse($check);
         } elseif (!empty($this->driver->getSolrMarcSpecs($check))) {
             $responses = $this->checkSolrMarcData(array($check), $check);
@@ -250,7 +250,7 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses implements Tra
                                 $level = $this->getLevel($date, $level, $solrMarcKey);
                                 $label = $this->getLabel($date, $label);
                                 $urls[] = $url;
-                                $response = $this->generateResponse($check, $solrMarcKey, $level, $label, $template, $data, $check_type, $url, true);
+                                $response = $this->generateResponse($check, $solrMarcKey, $level, $label, $template, $date, $check_type, $url, true);
                                 $response['html'] = $this->applyTemplate($template, $response);
                                 $responses[] = $response;
                                 if ($this->current_mode == 'break_on_first') {

@@ -34,7 +34,7 @@ class JournalsOnlinePrintPrint extends JournalsOnlinePrint
                 case 2:
                 case 3:
                     $level = "PrintAccess";
-                    $label = "PrintAccess";                    
+                    $label = "PrintAccess";
                     if (!empty($result['Signature'])) {
                         $url = $this->urlHelper->fromRoute('home').'Search/Results?lookfor='.$escaper->escapeHtml($result['Signature']).'&type='.$signatureSearch;
                     } else {

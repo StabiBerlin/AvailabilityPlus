@@ -157,7 +157,7 @@ class DAIA extends AvailabilityPlusResolver
                                         $record['daia_hint']['level'] = $limitation;
                                         $record['daia_hint']['label'] = $service_content['service'].$limitation;
                                         $record['score'] += 5;
-                                    }  else {
+                                    } else {
                                         $record['daia_hint']['level'] = "daia_green";
                                         $record['daia_hint']['label'] = $service_content['service'];
                                     }
