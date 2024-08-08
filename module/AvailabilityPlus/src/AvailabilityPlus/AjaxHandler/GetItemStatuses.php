@@ -371,7 +371,7 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses implements Tra
      * @return string (html code)
      */
     protected function applyTemplate($template, $response) {
-        return $this->renderer->render($template, $response);
+        return trim($this->renderer->render($template, $response));
     }
 
     /**
@@ -453,7 +453,7 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses implements Tra
                 $response = $this->generateResponse($resolver, $resolver, $resolver, $resolver, $template, $resolver_data['parsed_data'], $check_type, $resolver_url, true);
                 $response['resolverConfig'] = $this->resolverConfig[$resolver];
                 $response['html'] = $this->applyTemplate($template, $response);
-                if (empty($response['html']) || empty(trim($response['html']))) {
+                if (empty($response['html'])) {
                     $response['status']['level'] = 'unsuccessful_check';
                     $response['status']['label'] = 'Check did not find a match!';
                 }
