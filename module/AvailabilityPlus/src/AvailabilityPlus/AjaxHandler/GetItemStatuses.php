@@ -175,18 +175,43 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses implements Tra
 
     protected function setChecks($mediatype = '') {
         $list = $this->list;
-        $mediatype = str_replace(array(' ', '+'),array('',''), $mediatype);
-        $checks = 'RecordView';
-        if ($list) $checks = 'ResultList';
-        if (!empty($this->config[$this->source.$checks.'-'.$mediatype])) {
-            $this->checks = $this->config[$this->source.$checks.'-'.$mediatype];
-            $this->checkRoute = $this->source.$checks.'-'.$mediatype;
-        } else if (!empty($this->config[$checks.'-'.$mediatype])) {
-            $this->checks = $this->config[$checks.'-'.$mediatype];
-            $this->checkRoute = $checks.'-'.$mediatype;
-        } else if (!empty($this->config[$this->source.$checks])) {
-            $this->checks = $this->config[$this->source.$checks];
-            $this->checkRoute =$this->source.$checks;
+        $mediatype = str_replace([' ', '+'], ['', ''], $mediatype);
+        $checks = $list ? 'ResultList' : 'RecordView';
+        $configKeys = array_keys($this->config);
+        $format = $mediatype;
+
+        // go through all "check groups" (availabilityplus.ini config keys)
+        // e. g. [SolrResultList] or [SolrRecordView-Book]
+        foreach ($configKeys as $configKey) {
+            if (str_contains($configKey, $checks) && str_contains($configKey, $mediatype)) {
+                [$configView, $configFormats] = explode('-', $configKey);
+
+                // something after "-" exsists e. g. SolrResultList-Book
+                if (!empty($configFormats)) {
+                    $splittedFormats = explode('|', $configFormats);
+                }
+
+                // set $format with the first configFormats that maches the mediatype
+                // e. g. either Book|Journal or just Book
+                if (!empty($splittedFormats) && in_array($mediatype, $splittedFormats)) {
+                    if (str_starts_with($configView, $this->source) || str_starts_with($configView, $checks)) {
+                        $format = $configFormats;
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!empty($this->config[$this->source . $checks . '-' . $format])) {
+            $this->checks = $this->config[$this->source . $checks . '-' . $format];
+            $this->checkRoute = $this->source . $checks . '-' . $format;
+        } else if (!empty($this->config[$checks . '-' . $format])) {
+            $this->checks = $this->config[$checks . '-' . $format];
+            $this->checkRoute = $checks . '-' . $format;
+        } else if (!empty($this->config[$this->source . $checks])) {
+            $this->checks = $this->config[$this->source . $checks];
+            $this->checkRoute = $this->source . $checks;
         } else {
             $this->checks = $this->config[$checks];
             $this->checkRoute = $checks;
