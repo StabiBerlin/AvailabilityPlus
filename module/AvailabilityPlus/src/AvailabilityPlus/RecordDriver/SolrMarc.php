@@ -150,6 +150,10 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                 $solrMarcSpecs[$item]['view-method'] = $solrMarcSpec['view-method'];
             }
             unset($solrMarcSpec['view-method']);
+            if (!empty($solrMarcSpec['allow-url-duplications'])) {
+                $solrMarcSpecs[$item]['allow-url-duplications'] = $solrMarcSpec['allow-url-duplications'];
+            }
+            unset($solrMarcSpec['allow-url-duplications']);
             $solrMarcSpecs[$item]['match-key'] = '';
             if (!empty($solrMarcSpec['match-key'])) {
                 $solrMarcSpecs[$item]['match-key'] = $solrMarcSpec['match-key'];

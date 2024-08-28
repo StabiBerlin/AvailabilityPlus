@@ -6,6 +6,8 @@
 #   view-method:            <template used to render the data retrieved>
 #   category:               <categories corresponding to categories chosen in the core-template>
 #                               title should be set; other categories are mandatory
+#   allow-url-duplications: allows checks without resolver to configure url duplication
+#                               usage = allow-url-duplications: true
 #   originalletters:        <yes|no> whether item in original letters should be
 #                               shown or not (see marc 880)
 #   <main field>:           at least one should be set; fields with a leading 0 should be quoted

@@ -262,6 +262,7 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses implements Tra
         $urls = [];
         $break = false;
         foreach ($solrMarcKeys as $solrMarcKey) {
+            $specs = $this->driver->getSolrMarcSpecs($solrMarcKey);
             $data = $this->driver->getMarcData($solrMarcKey);
             $level = $this->getLevel($data[0], $check, $solrMarcKey);
             $label = $this->getLabel($data[0], $check);
@@ -271,7 +272,10 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses implements Tra
                     if (!empty($date['url']['data'][0])) {
                         foreach ($date['url']['data'] as $url) {
                             $url = str_replace('[path]', $this->urlHelper->fromRoute('home'), $url);
-                            if (!in_array($url, $urls)) {
+                            if (
+                                !in_array($url, $urls)
+                                || (!empty($specs['allow-url-duplications']) && $specs['allow-url-duplications'])
+                            ) {
                                 $level = $this->getLevel($date, $level, $solrMarcKey);
                                 $label = $this->getLabel($date, $label);
                                 $urls[] = $url;
