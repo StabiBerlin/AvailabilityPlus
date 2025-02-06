@@ -14,6 +14,7 @@ class Subito extends AvailabilityPlusResolver
      */
     public function fetchLinks($openUrl) {
         $url = $this->getResolverUrl($openUrl);
+
         return $url;
     }
 
@@ -28,19 +29,17 @@ class Subito extends AvailabilityPlusResolver
      * @return array         Array of values
      */
     public function parseLinks($data_org) {
-
         $urls = []; // to check for duplicate urls
         $records = []; // array to return
-
-        $record['level'] = "subito_preorder_check";
-        $record['label'] = "subito_preorder_check";
+        $record['level'] = 'subito_preorder_check';
+        $record['label'] = 'subito_preorder_check';
         $record['url'] = $data_org;
         $records[] = $record;
-
         $response['data'] = $data_org;
         $this->parsed_data = $records;
         $this->applyCustomChanges();
         $response['parsed_data'] = $this->parsed_data;
+
         return $response;
     }
 }

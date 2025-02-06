@@ -14,7 +14,8 @@ class Unpaywall extends AvailabilityPlusResolver
      */
     public function getResolverUrl($params) {
         $doi = str_replace('?doi=','',$params);
-        if ($doi) $url = $this->baseUrl.'/'.$doi.'?is_oa=boolean'.$this->additionalParams;
+        if ($doi) $url = "{$this->baseUrl}/{$doi}?is_oa=boolean{$this->additionalParams}";
+
         return $url;
     }
 
@@ -43,6 +44,7 @@ class Unpaywall extends AvailabilityPlusResolver
         $this->parsed_data = $links;
         $this->applyCustomChanges();
         $response['parsed_data'] = $this->parsed_data;
+
         return $response;
     }
 }

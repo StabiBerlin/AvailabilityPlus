@@ -3,8 +3,9 @@ namespace AvailabilityPlus\Resolver\Driver;
 
 use VuFind\Config\SearchSpecsReader;
 use VuFind\Crypt\HMAC;
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Laminas\Mvc\Controller\Plugin\Url;
+use \Laminas\Http\Client;
 
 class AvailabilityPlusResolver extends \VuFind\Resolver\Driver\AbstractBase
 {
@@ -18,7 +19,7 @@ class AvailabilityPlusResolver extends \VuFind\Resolver\Driver\AbstractBase
     /**
      * HTTP client
      *
-     * @var \Laminas\Http\Client
+     * @var Client
      */
     protected $httpClient;
 
@@ -38,9 +39,9 @@ class AvailabilityPlusResolver extends \VuFind\Resolver\Driver\AbstractBase
      * Constructor
      *
      * @param string            $baseUrl    Base URL for link resolver
-     * @param \Laminas\Http\Client $httpClient HTTP client
+     * @param Client $httpClient HTTP client
      */
-    public function __construct(ContainerInterface $sm, $baseUrl, \Laminas\Http\Client $httpClient, $additionalParams, $rules, HMAC $hmac, $resolverConfig, Url $urlHelper) {
+    public function __construct(ContainerInterface $sm, $baseUrl, Client $httpClient, $additionalParams, $rules, HMAC $hmac, $resolverConfig, Url $urlHelper) {
         parent::__construct($baseUrl);
         $this->serviceLocator = $sm;
         $this->httpClient = $httpClient;
@@ -63,9 +64,11 @@ class AvailabilityPlusResolver extends \VuFind\Resolver\Driver\AbstractBase
      */
     public function getResolverUrl($openUrl) {
         $url = '';
+
         if (!empty($this->baseUrl)) {
-            $url = $this->baseUrl.$openUrl.$this->additionalParams;
+            $url = "{$this->baseUrl}{$openUrl}{$this->additionalParams}";
         }
+
         return $url;
     }
 
@@ -81,6 +84,7 @@ class AvailabilityPlusResolver extends \VuFind\Resolver\Driver\AbstractBase
     public function fetchLinks($openUrl) {
         $url = $this->getResolverUrl($openUrl);
         $feed = $this->httpClient->setUri($url)->send()->getBody();
+
         return $feed;
     }
 
@@ -98,10 +102,13 @@ class AvailabilityPlusResolver extends \VuFind\Resolver\Driver\AbstractBase
         $this->parsed_data = $data_org;
         $response['data'] = $data_org;
         $this->applyCustomChanges();
+
         uasort($this->parsed_data, function($a, $b) {
             return $a['score'] <=> $b['score'];
         });
+
         $response['parsed_data'] = $this->parsed_data;
+
         return $response;
     }
 
@@ -111,15 +118,19 @@ class AvailabilityPlusResolver extends \VuFind\Resolver\Driver\AbstractBase
 
     protected function applyCustomChanges() {
         $specsReader = new SearchSpecsReader();
-        $rules = $specsReader->get($this->rules);
+        $rules = $specsReader->get($this->rules) ?? [];
+
         foreach ($this->parsed_data as $key => $item) {
             $rules_applied = [];
+
             foreach ($rules as $rule_key => $rule) {
                 $rule_applies = false;
+
                 foreach ($rule['conditions'] as $condition) {
                     $match_array = [];
                     $field_content = $item[$condition['field']];
-                    preg_match('|'.$condition['content'].'|',$field_content,$match_array);
+                    preg_match("|{$condition['content']}|", $field_content, $match_array);
+
                     if (!empty($match_array)) {
                         $rule_applies = true;
                     } else {
@@ -132,21 +143,22 @@ class AvailabilityPlusResolver extends \VuFind\Resolver\Driver\AbstractBase
                     foreach($rule['actions'] as $action) {
                         $content_old = $item[$action['field']];
                         $content_new = $content_old;
+
                         if (!empty($action['pattern'])) {
                             $content_preg =  $item[$action['content_field']];
-                            $content_new = preg_replace('|'.$action['pattern'].'|', $action['replacement'], $content_preg);
-                            $this->parsed_data[$key][$action['field'].'_org'] = $content_old;
+                            $content_new = preg_replace("|{$action['pattern']}|", $action['replacement'], $content_preg);
+                            $this->parsed_data[$key]["{$action['field']}_org"] = $content_old;
                             $this->parsed_data[$key][$action['field']] = $content_new;
                         } else if (isset($action['content'])) {
                             $content_new = preg_replace('|(.*)|', '$0', $action['content']);
-                            $this->parsed_data[$key][$action['field'].'_org'] = $content_old;
+                            $this->parsed_data[$key]["{$action['field']}_org"] = $content_old;
                             $this->parsed_data[$key][$action['field']] = $content_new;
                         } else if (!empty($action['function'])) {
                             switch ($action['function']) {
                                 case 'removeItem':
                                     //unset($this->parsed_data[$key]);
                                     foreach ($this->parsed_data[$key] AS $item_key => $item_value) {
-                                        $this->parsed_data[$key][$item_key.'_org'] = $item_value;
+                                        $this->parsed_data[$key]["{$item_key}_org"] = $item_value;
                                         unset($this->parsed_data[$key][$item_key]);
                                     }
                                     break;
@@ -163,6 +175,7 @@ class AvailabilityPlusResolver extends \VuFind\Resolver\Driver\AbstractBase
                     $rules_applied[$rule_key] = $rule;
                 }
             }
+
             if (!empty($rules_applied)) {
                 $this->parsed_data[$key]['rules_applied'] = $rules_applied;
             }
@@ -171,6 +184,7 @@ class AvailabilityPlusResolver extends \VuFind\Resolver\Driver\AbstractBase
 
     protected function getObjectPathValue($item, $path) {
         $content = '';
+
         switch (count($path)) {
             case 1:
                 $content = $item[$path[0]];
@@ -188,6 +202,7 @@ class AvailabilityPlusResolver extends \VuFind\Resolver\Driver\AbstractBase
                 $content = $item[$path[0]][$path[1]][$path[2]][$path[3]][$path[4]];
                 break;
         }
+
         return $content;
     }
 

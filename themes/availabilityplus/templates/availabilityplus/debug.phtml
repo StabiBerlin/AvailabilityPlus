@@ -6,15 +6,15 @@
     $ilsBackends = $config['Catalog']['ilsBackends'] ?? [DEFAULT_SEARCH_BACKEND];
     $sourceCount = count($ilsBackends);
     $source = 'Solr';
-    if (isset($_GET["source"])) {
-        $source = $_GET["source"];
+    if (isset($_GET['source'])) {
+        $source = $_GET['source'];
     } else {
         $source = $ilsBackends[$sourceCount - 1];
     }
-    if (isset($_GET["source"]) && $_GET["source"] === 'Search2') $source = 'Search2';
+    if (isset($_GET['source']) && $_GET['source'] === 'Search2') $source = 'Search2';
 
     $list = 1;
-    if (isset($_GET["list"]) && $_GET["list"] === '0') $list = 0;
+    if (isset($_GET['list']) && $_GET['list'] === '0') $list = 0;
     $list_name = 'ResultList';
     if ($list == 0) $list_name = 'DetailView';
 
@@ -50,8 +50,8 @@
     <h3>Debug ID <b><a href="<?=$this->url('home')?><?=$recordRoute?>/<?=$encodedId?>"><?=$this->escapeHtml($id)?></a></b> <?=$list_name?> <?=$source?></h3>
     <div class="availabilityItem" data-full="<?=$solrData?>" data-id="<?=$id?>" data-list="<?=$list?>" data-src="<?=$source?>" data-language="<?=$this->layout()->userLang; ?>" data-debug="1">
         <span class="status ajax-availability hidden">
-            <span class="icon--font fa fa-spinner icon--spin" role="img" aria-hidden="true"></span>
-            <?=$this->translate('loading_ellipsis')?>
+            <?=$this->icon('spinner')?>
+            <?=$this->transEsc('loading_ellipsis')?>
         </span>
     </div>
 </div>

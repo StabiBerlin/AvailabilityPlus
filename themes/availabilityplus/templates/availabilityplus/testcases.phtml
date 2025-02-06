@@ -8,7 +8,7 @@
 
     // Variables:
     $list = 1;
-    if (isset($_GET["list"]) && $_GET["list"] === '0') $list = 0;
+    if (isset($_GET['list']) && $_GET['list'] === '0') $list = 0;
     $view_name = 'ResultList';
     if ($list == 0) $view_name = 'RecordView';
     $counter = 1;
@@ -17,10 +17,10 @@
 <div class="AvailabilityPlusTestCases">
     <?php if (!empty($cases)): ?>
         <h3><?=$this->transEsc('AvailabilityPlus::Links To TestCase Views')?></h3>
-        <a href="<?=$this->url('home')?>AvailabilityPlus/TestCases?list=1"><?=$this->transEsc('AvailabilityPlus::TestCases ResultList')?></a>
+        <a href="<?=$this->url('availabilityplus-testcases', [], ['query' => ['list' => '1']])?>"><?=$this->transEsc('AvailabilityPlus::TestCases ResultList')?></a>
         |
-        <a href="<?=$this->url('home')?>AvailabilityPlus/TestCases?list=0"><?=$this->transEsc('AvailabilityPlus::TestCases RecordView')?></a>
-        <h3><?=$this->transEsc('AvailabilityPlus::TestCases '.$view_name)?></h3>
+        <a href="<?=$this->url('availabilityplus-testcases', [], ['query' => ['list' => '0']])?>"><?=$this->transEsc('AvailabilityPlus::TestCases RecordView')?></a>
+        <h3><?=$this->transEsc("AvailabilityPlus::TestCases {$view_name}")?></h3>
         <table>
             <tr>
                 <th id="tc_ncounter"><?=$this->transEsc('AvailabilityPlus::#')?></th>
@@ -50,24 +50,24 @@
 
                         if (!empty($case['description'])) $description = $case['description'];
                         $testcase_expected_result_class = 'testcase_expected_result';
-                        if (!empty($case['expected'][strtolower($view_name)]['html_'.$this->layout()->userLang])) {
-                            $expected = $case['expected'][strtolower($view_name)]['html_'.$this->layout()->userLang];
+                        if (!empty($case['expected'][strtolower($view_name)]['html_' . $this->layout()->userLang])) {
+                            $expected = $case['expected'][strtolower($view_name)]['html_' . $this->layout()->userLang];
                             $testcase_expected_result_class = 'testcase_expected_result_html';
                         } else if (!empty($case['expected'][strtolower($view_name)]['html'])) {
                             $expected = $case['expected'][strtolower($view_name)]['html'];
                             $testcase_expected_result_class = 'testcase_expected_result_html';
-                        } else if (!empty($case['expected'][strtolower($view_name)]['description_'.$this->layout()->userLang])) {
-                            $expected = $case['expected'][strtolower($view_name)]['description_'.$this->layout()->userLang];
+                        } else if (!empty($case['expected'][strtolower($view_name)]['description_' . $this->layout()->userLang])) {
+                            $expected = $case['expected'][strtolower($view_name)]['description_' . $this->layout()->userLang];
                         } else if (!empty($case['expected'][strtolower($view_name)]['description'])) {
                             $expected = $case['expected'][strtolower($view_name)]['description'];
-                        } else if (!empty($case['expected']['html_'.$this->layout()->userLang])) {
-                            $expected = $case['expected']['html_'.$this->layout()->userLang];
+                        } else if (!empty($case['expected']['html_' . $this->layout()->userLang])) {
+                            $expected = $case['expected']['html_' . $this->layout()->userLang];
                             $testcase_expected_result_class = 'testcase_expected_result_html';
                         } else if (!empty($case['expected']['html'])) {
                             $expected = $case['expected']['html'];
                             $testcase_expected_result_class = 'testcase_expected_result_html';
-                        } else if (!empty($case['expected']['description_'.$this->layout()->userLang])) {
-                            $expected = $case['expected']['description_'.$this->layout()->userLang];
+                        } else if (!empty($case['expected']['description_' . $this->layout()->userLang])) {
+                            $expected = $case['expected']['description_' . $this->layout()->userLang];
                         } else if (!empty($case['expected']['description'])) {
                             $expected = $case['expected']['description'];
                         }
@@ -96,8 +96,8 @@
                         <td id="testcase_actual_result_<?=$id?>" class="testcase_actual_result">
                             <div class="availabilityItem" data-id="<?=$id?>" data-list="<?=$list?>" data-src="<?=$source?>" data-language="<?=$this->layout()->userLang; ?>" data-testcase="true">
                                 <span class="status ajax-availability hidden">
-                                    <span class="icon--font fa fa-spinner icon--spin" role="img" aria-hidden="true"></span>
-                                    <?=$this->translate('loading_ellipsis')?>
+                                    <?=$this->icon('spinner')?>
+                                    <?=$this->transEsc('loading_ellipsis')?>
                                 </span>
                             </div>
                         </td>

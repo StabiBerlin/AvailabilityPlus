@@ -1,8 +1,8 @@
 <?php
 namespace AvailabilityPlus\AjaxHandler;
 
-use Interop\Container\ContainerInterface;
-use Laminas\ServiceManager\Factory\FactoryInterface;
+use Psr\Container\ContainerExceptionInterface as ContainerException;
+use Psr\Container\ContainerInterface;
 
 /**
  * Factory for GetItemStatus AJAX handler.
@@ -11,7 +11,7 @@ use Laminas\ServiceManager\Factory\FactoryInterface;
  * @package  AJAX
  * @link     https://vufind.org/wiki/development Wiki
  */
-class GetItemStatusesFactory implements FactoryInterface
+class GetItemStatusesFactory implements \Laminas\ServiceManager\Factory\FactoryInterface
 {
     /**
      * Create an object
@@ -34,11 +34,11 @@ class GetItemStatusesFactory implements FactoryInterface
             throw new \Exception('Unexpected options passed to factory.');
         }
         return new $requestedName(
-            $container->get('VuFind\Record\Loader'),
-            $container->get('VuFind\Config\PluginManager')->get('availabilityplus'),
+            $container->get(\VuFind\Record\Loader::class),
+            $container->get(\VuFind\Config\PluginManager::class)->get('availabilityplus'),
             $container->get('ViewRenderer'),
-            $container->get('VuFind\Resolver\Driver\PluginManager'),
-            $container->get('VuFind\Config\PluginManager')->get('availabilityplus-resolver'),
+            $container->get(\VuFind\Resolver\Driver\PluginManager::class),
+            $container->get(\VuFind\Config\PluginManager::class)->get('availabilityplus-resolver'),
             $container->get('ControllerPluginManager')->get('url')
         );
     }

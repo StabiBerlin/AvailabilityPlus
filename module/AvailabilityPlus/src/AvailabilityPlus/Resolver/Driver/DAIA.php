@@ -19,6 +19,7 @@ class DAIA extends AvailabilityPlusResolver
         $headers = $this->httpClient->getRequest()->getHeaders();
         $headers->addHeaderLine('Accept-Language', $this->language);
         $feed = $this->httpClient->setUri($url)->send()->getBody();
+
         return $feed;
     }
 
@@ -34,29 +35,29 @@ class DAIA extends AvailabilityPlusResolver
      */
     public function parseLinks($data_org) {
         $urls = []; // to check for duplicate urls
-
         $data = json_decode($data_org, true);
         $this->parsed_data = $data;
 
-        foreach ($data['document'][0]['item'] as $key => $item) {
+        foreach ($data['document'][0]['item'] ?? [] as $key => $item) {
             $item_services['available']['openaccess'] = [];
             $item_services['available']['remote'] = [];
             $item_services['available']['loan'] = [];
             $item_services['available']['presentation'] = [];
             $item_services['available']['fallback'][] = 'fallback';
 
-            foreach ($item['available'] as $service) {
+            foreach ($item['available'] ?? [] as $service) {
                 $item_services['available'][$service['service']][] = $service;
                 $item_services['available']['fallback'] = [];
             }
-            
-            foreach ($item['unavailable'] as $service) {
+
+            foreach ($item['unavailable']?? [] as $service) {
                 if (count($service) > 1) {
                     $item_services['available'][$service['service']][] = $service;
                 }
             }
 
             $break = false;
+
             foreach ($item_services['available'] as $service_key => $service_group) {
                 foreach ($service_group as $service_content) {
                     $record = [];
@@ -67,24 +68,27 @@ class DAIA extends AvailabilityPlusResolver
 
                     if (!empty($service_content)) {
                         $record['id'] = $data['document'][0]['id'];
-                        $record['ppn'] = substr($data['document'][0]['id'], strrpos($data['document'][0]['id'], ":") + 1);
-                        
-                        if ($item['id'] && strpos($item['id'], ":epn:") !== false) {
+                        $record['ppn'] = substr($data['document'][0]['id'], strrpos($data['document'][0]['id'], ':') + 1);
+
+                        if ($item['id'] && strpos($item['id'], ':epn:') !== false) {
                             $record['epn_id'] = $item['id'];
-                            $record['epn'] = substr($item['id'], strrpos($item['id'], ":") + 1);
-                        } elseif ($item['temporary-hack-do-not-use']) {
+                            $record['epn'] = substr($item['id'], strrpos($item['id'], ':') + 1);
+                        } elseif (!empty($item['temporary-hack-do-not-use'])) {
                             $record['epn'] = $item['temporary-hack-do-not-use'];
                         }
-                        if ($item['id'] && strpos($item['id'], ":bar:") !== false) {
+
+                        if ($item['id'] && strpos($item['id'], ':bar:') !== false) {
                             $record['barcode_id'] = $item['id'];
-                            $record['barcode'] = substr($item['id'], strrpos($item['id'], "$") + 1);
+                            $record['barcode'] = substr($item['id'], strrpos($item['id'], '$') + 1);
                         } elseif (!empty($service_content['href'])) {
-                            $query = parse_url($service_content['href'],PHP_URL_QUERY);
+                            $query = parse_url($service_content['href'], PHP_URL_QUERY);
                             $query_array = [];
                             parse_str($query, $query_array);
-                            $record['barcode'] = $query_array['bar'];
+                            $record['barcode'] = $query_array['bar'] ?? '';
                         }
+
                         $record['service'] = $service_key;
+
                         switch ($record['service']) {
                             case 'openaccess':
                                 if (!in_array($service_content['href'], $urls) || !$this->resolverConfig->hide_url_duplicates) {
@@ -109,7 +113,7 @@ class DAIA extends AvailabilityPlusResolver
                                     if (empty($record['score'])) $record['score'] = 10;
                                     if (!empty($service_content['limitation'][0]['content'])) {
                                         $record['daia_action']['limitation'] = $service_content['limitation'][0]['content'];
-                                        $record['daia_action']['limitation_label'] = str_replace(" ", "", $service_content['limitation'][0]['content']);
+                                        $record['daia_action']['limitation_label'] = str_replace(' ', '', $service_content['limitation'][0]['content']);
                                         $record['score'] = 15;
                                     }
                                     if (empty($this->parsed_data['document'][0]['item'][$key]['availabilityplus'])) {
@@ -138,27 +142,27 @@ class DAIA extends AvailabilityPlusResolver
                                     }
                                     if (!empty($item['label'])) $record['callnumber'] = $item['label'];
                                     if (!empty($service_content['expected'])) {
-                                        $record['daia_hint']['level'] = "daia_orange";
+                                        $record['daia_hint']['level'] = 'daia_orange';
                                         $date = date_create($service_content['expected']);
                                         $record['daia_hint']['label'] = 'on_loan_until';
-                                        $record['daia_hint']['label_date'] = date_format($date,"d.m.Y");
+                                        $record['daia_hint']['label_date'] = date_format($date, 'd.m.Y');
                                         $record['score'] += 20;
                                     } elseif (!empty($service_content['queue'])) {
-                                        $record['daia_hint']['level'] = "daia_orange";
+                                        $record['daia_hint']['level'] = 'daia_orange';
                                         $record['daia_hint']['label'] = 'on_loan';
                                         $record['score'] += 20;
                                     } elseif (!empty($service_content['limitation'][0]['id'])) {
-                                        $limitation = str_replace(' ','', substr($service_content['limitation'][0]['id'], strpos($service_content['limitation'][0]['id'], "#") + 1));
-                                        $record['daia_hint']['label'] = $limitation;
-                                        $record['daia_hint']['label'] = $service_content['service'].$limitation;
+                                        $limitation = str_replace(' ', '', substr($service_content['limitation'][0]['id'], strpos($service_content['limitation'][0]['id'], '#') + 1));
+                                        $record['daia_hint']['level'] = $limitation;
+                                        $record['daia_hint']['label'] = "{$service_content['service']}{$limitation}";
                                         $record['score'] += 5;
                                     } elseif (!empty($service_content['limitation'][0]['content'])) {
-                                        $limitation = str_replace(' ','',$service_content['limitation'][0]['content']);
+                                        $limitation = str_replace(' ', '', $service_content['limitation'][0]['content']);
                                         $record['daia_hint']['level'] = $limitation;
-                                        $record['daia_hint']['label'] = $service_content['service'].$limitation;
+                                        $record['daia_hint']['label'] = "{$service_content['service']}{$limitation}";
                                         $record['score'] += 5;
                                     } else {
-                                        $record['daia_hint']['level'] = "daia_green";
+                                        $record['daia_hint']['level'] = 'daia_green';
                                         $record['daia_hint']['label'] = $service_content['service'];
                                     }
                                     if (!empty($service_content['href'])) {
@@ -170,14 +174,14 @@ class DAIA extends AvailabilityPlusResolver
                                         $record['daia_action']['label'] = $action;
                                         $record['daia_action']['url'] = $this->generateOrderLink($action, $data['document'][0]['id'], $item['id'], $item['storage']['id']);
                                     } else {
-                                        $record['daia_action']['label'] = $service_content['service'].'_default_action'.$limitation;
+                                        $record['daia_action']['label'] = "{$service_content['service']}_default_action";
                                     }
                                     if (isset($service_content['queue'])) {
                                         $record['queue']['length'] = $service_content['queue'];
                                         if ($service_content['queue'] == 1) {
-                                            $record['queue']['label'] .=  'Recall';
+                                            $record['queue']['label'] = 'Recall';
                                         } else {
-                                            $record['queue']['label'] .=  'Recalls';
+                                            $record['queue']['label'] = 'Recalls';
                                         }
                                         $record['score'] += $service_content['queue'];
                                     }
@@ -203,6 +207,8 @@ class DAIA extends AvailabilityPlusResolver
                                     if (!empty($item['label'])) $record['callnumber'] = $item['label'];
                                     $record['daia_hint']['level'] = 'daia_red';
                                     $record['daia_hint']['label'] = 'not_available';
+                                    $record['daia_action']['level'] = 'fallback';
+                                    $record['daia_action']['label'] = 'fallback';
                                     if (!empty($item['about'])) {
                                         $record['about'] = $item['about'];
                                     }
@@ -216,9 +222,11 @@ class DAIA extends AvailabilityPlusResolver
 
                                 }
                         }
+
                         if ($break) break;
                     }
                 }
+
                 if ($break) break;
             }
         }
@@ -227,6 +235,7 @@ class DAIA extends AvailabilityPlusResolver
         $this->applyCustomChanges();
         $this->determineBestItem();
         $response['parsed_data'] = $this->parsed_data;
+
         return $response;
     }
 
@@ -242,8 +251,8 @@ class DAIA extends AvailabilityPlusResolver
 
                 foreach ($rule['conditions'] as $condition) {
                     $match_array = [];
-                    $field_content = $this->getObjectPathValue($item, explode('->',$condition['field']));
-                    preg_match('|'.$condition['content'].'|',$field_content,$match_array);
+                    $field_content = $this->getObjectPathValue($item, explode('->', $condition['field']));
+                    preg_match("|{$condition['content']}|", $field_content, $match_array);
 
                     if (!empty($match_array)) {
                         $rule_applies = true;
@@ -255,18 +264,18 @@ class DAIA extends AvailabilityPlusResolver
 
                 if ($rule_applies) {
                     foreach ($rule['actions'] as $action) {
-                        $content_old = $this->getObjectPathValue($item, explode('->',$action['field']));
+                        $content_old = $this->getObjectPathValue($item, explode('->', $action['field']));
                         $content_new = $content_old;
 
                         if (!empty($action['pattern'])) {
-                            $content_preg =  $this->getObjectPathValue($item, explode('->',$action['content_field']));
-                            $content_new = preg_replace('|'.$action['pattern'].'|', $action['replacement'], $content_preg);
-                            $this->setObjectPathValue($key, explode('->',$action['field'].'_org'), $content_old);
-                            $this->setObjectPathValue($key, explode('->',$action['field']), $content_new);
+                            $content_preg =  $this->getObjectPathValue($item, explode('->', $action['content_field']));
+                            $content_new = preg_replace("|{$action['pattern']}|", $action['replacement'], $content_preg);
+                            $this->setObjectPathValue($key, explode('->', "{$action['field']}_org"), $content_old);
+                            $this->setObjectPathValue($key, explode('->', $action['field']), $content_new);
                         } else if(isset($action['content'])) {
                             $content_new = preg_replace('|(.*)|', '$0', $action['content']);
-                            $this->setObjectPathValue($key, explode('->',$action['field'].'_org'), $content_old);
-                            $this->setObjectPathValue($key, explode('->',$action['field']), $content_new);
+                            $this->setObjectPathValue($key, explode('->', "{$action['field']}_org"), $content_old);
+                            $this->setObjectPathValue($key, explode('->', $action['field']), $content_new);
                         } else if(!empty($action['function'])) {
                             switch ($action['function']) {
                                 case 'removeItem':
@@ -346,7 +355,7 @@ class DAIA extends AvailabilityPlusResolver
     }
 
     protected function determineBestItem() {
-        foreach ($this->parsed_data['document'][0]['item'] as $key => $item) {
+        foreach ($this->parsed_data['document'][0]['item'] ?? [] as $key => $item) {
             if (empty($this->parsed_data['best_item']) || (!empty($item['availabilityplus']['score']) && $item['availabilityplus']['score'] < $this->parsed_data['best_item']['availabilityplus']['score'])) {
                 $this->parsed_data['best_item'] = $this->parsed_data['document'][0]['item'][$key];
             }
@@ -354,8 +363,8 @@ class DAIA extends AvailabilityPlusResolver
     }
 
     protected function generateOrderLink($action, $doc_id, $item_id, $storage_id) {
-        $id = substr($doc_id, strrpos($doc_id, ":") + 1);
-        $hmacKeys = explode(':','id:item_id:doc_id');
+        $id = substr($doc_id, strrpos($doc_id, ':') + 1);
+        $hmacKeys = explode(':', 'id:item_id:doc_id');
         $hmacPairs = [
             'id' => $id,
             'doc_id' => $doc_id,
@@ -363,11 +372,27 @@ class DAIA extends AvailabilityPlusResolver
         ];
 
         if ($action == 'order') {
-            return $this->urlHelper->fromRoute('home').'Record/'.$id.'/StorageRetrievalRequest?id='.$id.'&doc_id='.urlencode($doc_id).'&item_id='.urlencode($item_id).'&hashKey='.$this->hmac->generate($hmacKeys,$hmacPairs);
+            return $this->urlHelper->fromRoute('home') .
+                "Record/{$id}" .
+                "/StorageRetrievalRequest?id={$id}" .
+                '&doc_id=' . urlencode($doc_id) .
+                '&item_id=' . urlencode($item_id) .
+                '&hashKey=' . $this->hmac->generate($hmacKeys, $hmacPairs);
         } else if ($action == 'recall') {
-            return $this->urlHelper->fromRoute('home').'Record/'.$id.'/Hold?id='.$id.'&doc_id='.urlencode($doc_id).'&item_id='.urlencode($item_id).'&hashKey='.$this->hmac->generate($hmacKeys,$hmacPairs);
+            return $this->urlHelper->fromRoute('home') .
+                "Record/{$id}" .
+                "/Hold?id={$id}" .
+                '&doc_id=' . urlencode($doc_id) .
+                '&item_id=' . urlencode($item_id) .
+                '&hashKey=' . $this->hmac->generate($hmacKeys, $hmacPairs);
         } else {
-            return $this->urlHelper->fromRoute('home').'Record/'.$id.'/Hold?doc_id='.urlencode($doc_id).'&item_id='.urlencode($item_id).'&type='.$action.'&storage_id='.urlencode($storage_id).'&hashKey='.$this->hmac->generate($hmacKeys,$hmacPairs);
+            return $this->urlHelper->fromRoute('home') .
+                "Record/{$id}" .
+                '/Hold?doc_id=' . urlencode($doc_id) .
+                '&item_id=' . urlencode($item_id) .
+                "&type={$action}" .
+                '&storage_id=' . urlencode($storage_id) .
+                '&hashKey=' . $this->hmac->generate($hmacKeys, $hmacPairs);
         }
     }
 }

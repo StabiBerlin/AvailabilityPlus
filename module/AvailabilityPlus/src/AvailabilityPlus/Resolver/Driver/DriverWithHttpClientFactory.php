@@ -1,8 +1,8 @@
 <?php
 namespace AvailabilityPlus\Resolver\Driver;
 
-use Interop\Container\ContainerInterface;
-use Laminas\ServiceManager\Factory\FactoryInterface;
+use Psr\Container\ContainerExceptionInterface as ContainerException;
+use Psr\Container\ContainerInterface;
 
 class DriverWithHttpClientFactory extends \VuFind\Resolver\Driver\DriverWithHttpClientFactory
 {
@@ -31,10 +31,10 @@ class DriverWithHttpClientFactory extends \VuFind\Resolver\Driver\DriverWithHttp
         return new $requestedName(
             $container,
             $config['ResolverBaseURL'][$resolverName],
-            $container->get('VuFindHttp\HttpService')->createClient(),
+            $container->get(\VuFindHttp\HttpService::class)->createClient(),
             $config['ResolverExtraParams'][$resolverName],
-            'availabilityplus-resolver-'.$resolverName.'.yaml',
-            $container->get('VuFind\Crypt\HMAC'),
+            "availabilityplus-resolver-{$resolverName}.yaml",
+            $container->get(\VuFind\Crypt\HMAC::class),
             $config[$resolverName],
             $container->get('ControllerPluginManager')->get('url')
         );

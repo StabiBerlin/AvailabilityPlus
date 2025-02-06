@@ -9,8 +9,8 @@
                 $url = $result['url'];
             ?>
             <div class="delimiter"></div>
-            <a href="<?=$url?>" class="<?=$level?> link_external" title="<?=$this->transEsc('AvailabilityPlus::'.$label)?>" target="_blank">
-                <?=$this->transEsc('AvailabilityPlus::'.$label)?>
+            <a href="<?=$url?>" class="<?=$level?> link_external" title='<?=$this->transEsc("AvailabilityPlus::{$label}")?>' target="_blank">
+                <?=$this->transEsc("AvailabilityPlus::{$label}")?>
             </a>
             <br/>
         <?php if (!$list): ?>

@@ -17,7 +17,7 @@ class JournalsOnlinePrintPrint extends JournalsOnlinePrint
         $escaper = new \Laminas\Escaper\Escaper('utf-8');
         $urls = []; // to check for duplicate urls
         $records = []; // array to return
-        $data = @simplexml_load_string($data_org, "SimpleXMLElement", LIBXML_COMPACT);
+        $data = @simplexml_load_string($data_org, 'SimpleXMLElement', LIBXML_COMPACT);
         $data = json_decode(json_encode($data), true);
         $signatureSearch = $this->resolverConfig['signature_search'];
         $titleSearch = $this->resolverConfig['title_search'];
@@ -33,12 +33,13 @@ class JournalsOnlinePrintPrint extends JournalsOnlinePrint
             switch ($result['@attributes']['state']) {
                 case 2:
                 case 3:
-                    $level = "PrintAccess";
-                    $label = "PrintAccess";
+                    $level = 'PrintAccess';
+                    $label = 'PrintAccess';
+
                     if (!empty($result['Signature'])) {
-                        $url = $this->urlHelper->fromRoute('home').'Search/Results?lookfor='.$escaper->escapeHtml($result['Signature']).'&type='.$signatureSearch;
+                        $url = $this->urlHelper->fromRoute('home') . 'Search/Results?lookfor=' . $escaper->escapeHtml($result['Signature']) . '&type=' . $signatureSearch;
                     } else {
-                        $url = $this->urlHelper->fromRoute('home').'Search/Results?lookfor='.$escaper->escapeHtml($result['Title']).'&type='.$titleSearch;
+                        $url = $this->urlHelper->fromRoute('home') . 'Search/Results?lookfor=' . $escaper->escapeHtml($result['Title']) . '&type=' . $titleSearch;
                     }
 
                     if (!in_array($url, $urls)) {
@@ -57,13 +58,17 @@ class JournalsOnlinePrintPrint extends JournalsOnlinePrint
                     break;
             }
         }
+
         $response['data'] = $data_org;
         $this->parsed_data = $records;
         $this->applyCustomChanges();
+
         uasort($this->parsed_data, function($a, $b) {
             return $a['score'] <=> $b['score'];
         });
+
         $response['parsed_data'] = $this->parsed_data;
+
         return $response;
     }
 }

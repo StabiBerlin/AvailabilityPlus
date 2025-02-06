@@ -68,6 +68,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
     public function addSolrMarcYaml($solrMarcYaml, $parse = true) {
         if (!in_array($solrMarcYaml, $this->solrMarcYamls)) {
             $this->solrMarcYamls[] = $solrMarcYaml;
+
             if ($parse) {
                 $this->parseSolrMarcSpecs($solrMarcYaml);
             }
@@ -85,6 +86,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                 $this->parseSolrMarcSpecs($solrMarcYaml);
             }
         }
+
         return $this->solrMarcSpecs[$item] ?? [];
     }
 
@@ -99,13 +101,16 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                 $this->parseSolrMarcSpecs($solrMarcYaml);
             }
         }
+
         $specKeys = array_keys($this->solrMarcSpecs);
+
         if (empty($category)) {
             if (!$others) {
                 if (($key = array_search('other', $specKeys)) !== false) {
                     unset($specKeys[$key]);
                 }
             }
+
             return $specKeys;
         } else {
             if (is_array($this->solrMarcKeys[$category])) {
@@ -125,44 +130,55 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
         $specsReader = new SearchSpecsReader();
         $rawSolrMarcSpecs = $specsReader->get($solrMarcYaml);
         $solrMarcSpecs = $this->solrMarcSpecs;
+
         foreach ($rawSolrMarcSpecs as $item => $solrMarcSpec) {
             $solrMarcSpecs[$item] = [];
+
             if (array_key_exists('category', $solrMarcSpec)) {
                 $category = $solrMarcSpec['category'];
                 unset($solrMarcSpec['category']);
             } else {
                 $category = 'other';
             }
+
             if (empty($this->solrMarcKeys[$category])) {
                 $this->solrMarcKeys[$category] = [];
             }
             $this->solrMarcKeys[$category][] = $item;
+
             if (!empty($solrMarcSpec['originalletters']) && $solrMarcSpec['originalletters'] == 'no') {
                 $solrMarcSpecs[$item]['originalletters'] = 'no';
             }
 	        unset($solrMarcSpec['originalletters']);
+
 	        if (!empty($solrMarcSpec['mandatory-field'])) {
                 $solrMarcSpecs[$item]['mandatory-field'] = $solrMarcSpec['mandatory-field'];
             }
             unset($solrMarcSpec['mandatory-field']);
+
             $solrMarcSpecs[$item]['view-method'] = 'default';
 	        if (!empty($solrMarcSpec['view-method'])) {
                 $solrMarcSpecs[$item]['view-method'] = $solrMarcSpec['view-method'];
             }
             unset($solrMarcSpec['view-method']);
+
             if (!empty($solrMarcSpec['allow-url-duplications'])) {
                 $solrMarcSpecs[$item]['allow-url-duplications'] = $solrMarcSpec['allow-url-duplications'];
             }
             unset($solrMarcSpec['allow-url-duplications']);
+
             $solrMarcSpecs[$item]['match-key'] = '';
             if (!empty($solrMarcSpec['match-key'])) {
                 $solrMarcSpecs[$item]['match-key'] = $solrMarcSpec['match-key'];
             }
             unset($solrMarcSpec['match-key']);
-            $conditions = $subfields = $parentMethods = $description = [];
+
+            $conditions = $subfields = $parentMethods = $descriptions = [];
+
 	        foreach ($solrMarcSpec as $marcField => $fieldSpec) {
                 if (!empty($fieldSpec)) {
-                    $conditions = $subfields = $parentMethods = $description = [];
+                    $conditions = $subfields = $parentMethods = $descriptions = [];
+
                     foreach ($fieldSpec as $subField => $subFieldSpec) {
                         if (is_array($subFieldSpec)) {
                             if ($subField == 'conditions') {
@@ -177,11 +193,13 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                                 $descriptions[] = $subFieldSpec;
                             } elseif ($subField == 'subfields') {
                                 $specs = [];
+
                                 foreach ($subFieldSpec as $index => $spec) {
                                     if ($index != 0) {
                                         $specs[] = $spec;
                                     }
                                 }
+
                                 foreach ($subFieldSpec[0] as $subField) {
                                     $subfields[$subField] = $specs;
                                 }
@@ -193,12 +211,16 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                         }
                     }
                 }
+
                 $solrMarcSpecs[$item][$marcField]['conditions'] = $conditions;
                 $solrMarcSpecs[$item][$marcField]['subfields'] = $subfields;
                 $solrMarcSpecs[$item][$marcField]['parent'] = $parentMethods;
+                $solrMarcSpecs[$item][$marcField]['description'] = $descriptions;
             }
         }
+
         $this->solrMarcSpecs = $solrMarcSpecs;
+
         if (empty($this->originalLetters)) {
             $this->originalLetters = $this->getOriginalLetters();
         }
@@ -211,25 +233,32 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     public function getMarcData($dataName) {
         $solrMarcSpecs = $this->getSolrMarcSpecs($dataName);
-        if (empty($solrMarcSpecs) && method_exists($this, 'get' . $dataName)) { 
-            return call_user_func([$this, 'get' . $dataName]);
+
+        if (empty($solrMarcSpecs) && method_exists($this, "get{$dataName}")) {
+            return call_user_func([$this, "get{$dataName}"]);
         }
+
         $title = $solrMarcSpecs['title'] ?? '';
         unset($solrMarcSpecs['title']);
         $mandatoryField = $solrMarcSpecs['mandatory-field'] ?? '';
         unset($solrMarcSpecs['mandatory-field']);
         $mandatoryFieldSet = (empty($mandatoryField));
+
         if (is_array($solrMarcSpecs)) {
             foreach ($solrMarcSpecs as $field => $subFieldSpecs) {
                 $indexData = [];
+
                 if (!empty($subFieldSpecs['parent'])) {
                     $tmpKey = '';
                     $tmpData = [];
+
                     foreach ($subFieldSpecs['parent'] as $subFieldSpec) {
                         if ($subFieldSpec[0] == 'method') {
                             $method = $subFieldSpec[1];
+
                             if (is_callable([$this, $method])) {
                                 $indexValues = call_user_func([$this, $method]);
+
                                 if (is_array($indexValues)) {
                                     foreach ($indexValues as $indexKey => $value) {
                                         $tmpData[$indexKey] = ['data'=> [$value]];
@@ -242,6 +271,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                             $tmpKey = $subFieldSpec[1];
                         }
                     }
+
                     if (!empty($tmpData)) {
                         if (is_array($tmpData)) {
                             $indexData = [$tmpData];
@@ -252,24 +282,29 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                         }
                     }
                 }
-                foreach ($this->getMarcRecord()->getFields($field) as $index => $fieldObject) {
+
+                foreach ($this->getMarcReader()->getFields($field) as $index => $fieldObject) {
                     $data = $indexData[0] ?? [];
                     $conditionForcedValue = [];
+
                     if (!empty($subFieldSpecs['conditions'])) {
                         foreach ($subFieldSpecs['conditions'] as $condition) {
                             list($type, $key, $val) = $condition;
                             $val = strval($val);
+
                             if (substr($val, 0, 1) == '!') {
                                 $val = substr($val, 1);
+
                                 if ($type == 'indicator') {
-                                    $indicator = $fieldObject->getIndicator($key);
-                                    if (!empty($indicator) && ($val == '*' || preg_match('/'.$val.'/', $indicator))) {
+                                    $indicator = $fieldObject["i{$key}"];
+
+                                    if (!empty($indicator) && ($val == '*' || preg_match("/{$val}/", $indicator))) {
                                         continue 2;
                                     }
                                 } elseif ($type == 'field') {
-                                    foreach ($fieldObject->getSubfields() as $subFieldObject) {
-                                        if ($subFieldObject->getCode() == $key) {
-                                            if ($val == '*' || preg_match('/'.$val.'/', $subFieldObject->getData())) {
+                                    foreach ($fieldObject['subfields'] as $subFieldObject) {
+                                        if ($subFieldObject['code'] == $key) {
+                                            if ($val == '*' || preg_match("/{$val}/", $subFieldObject['data'])) {
                                                 continue 3;
                                             }
                                         }
@@ -277,23 +312,27 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                                 }
                             } else {
                                 if ($type == 'indicator') {
-                                    $indicator = $fieldObject->getIndicator($key);
-                                    if (!isset($indicator) || $val != '*' && !preg_match('/'.$val.'/', $indicator)) {
+                                    $indicator = $fieldObject["i{$key}"];
+
+                                    if (!isset($indicator) || $val != '*' && !preg_match("/{$val}/", $indicator)) {
                                         continue 2;
                                     }
                                 } elseif ($type == 'field') {
                                     $fieldExists = false;
                                     $subfieldCheckPassed = false;
-                                    foreach ($fieldObject->getSubfields() as $subFieldObject) {
-                                        if ($subFieldObject->getCode() == $key) {
+
+                                    foreach ($fieldObject['subfields'] as $subFieldObject) {
+                                        if ($subFieldObject['code'] == $key) {
                                             $fieldExists = true;
-                                            if ($val == '*' || preg_match('/'.$val.'/', $subFieldObject->getData())) {
+
+                                            if ($val == '*' || preg_match("/{$val}/", $subFieldObject['data'])) {
                                                 $subfieldCheckPassed = true;
-                                                $conditionForcedValue[$key] = $subFieldObject->getData();
+                                                $conditionForcedValue[$key] = $subFieldObject['data'];
                                                 break;
                                             }
                                         }
                                     }
+
                                     if (!$subfieldCheckPassed || !$fieldExists) {
                                         continue 2;
                                     }
@@ -301,16 +340,19 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                             }
                         }
                     }
+
                     if (!empty($subFieldSpecs['subfields'])) {
                         $subFieldList = [];
+
                         foreach ($subFieldSpecs['subfields'] as $subField => $specs) {
                             $subFieldList[$subField] = [];
+
                             if (!empty($specs)) {
                                 foreach ($specs as $spec) {
                                     if (isset($spec[0])) {
                                         if ($spec[0] == 'name') {
                                             if (!empty($subFieldList[$subField]['name'])) {
-                                                $subFieldList[$subField]['name'] .= '#' . $spec[1];
+                                                $subFieldList[$subField]['name'] .= "#{$spec[1]}";
                                             } else {
                                                 $subFieldList[$subField]['name'] = $spec[1];
                                             }
@@ -336,37 +378,43 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                                 }
                             }
                         }
+
                         $dataIndex = 0;
+
                         foreach ($subFieldList as $subfield => $properties) {
                             $fieldData = [];
+
                             if (strpos($subfield, 'indicator') !== false) {
                                 $indicator = substr($subfield, 9, 1);
-                                $fieldData[] = $fieldObject->getIndicator($indicator);
+                                $fieldData[] = $fieldObject["i{$key}"];
                             } else {
-                                foreach ($fieldObject->getSubfields() as $subFieldObject) {
-                                    if ($subFieldObject->getCode() == $subfield) {
+                                foreach ($fieldObject['subfields'] as $subFieldObject) {
+                                    if ($subFieldObject['code'] == $subfield) {
                                         if (!empty($conditionForcedValue[$subfield])) {
-                                            if ($subFieldObject->getData() == $conditionForcedValue[$subfield]) {
+                                            if ($subFieldObject['data'] == $conditionForcedValue[$subfield]) {
                                                 $fieldData[] = $conditionForcedValue[$subfield];
                                             }
                                         } else {
-                                            $fieldData[] = $subFieldObject->getData();
+                                            $fieldData[] = $subFieldObject['data'];
                                         }
                                     }
                                 }
                             }
+
                             if (!empty($fieldData)) {
                                 foreach ($fieldData as $fieldDate) {
                                     if (isset($properties['filter']) && isset($properties['match'])) {
-                                        if (preg_match('/' . $properties['filter'] . '/', $fieldDate, $matches)) {
+                                        if (preg_match("/{$properties['filter']}/", $fieldDate, $matches)) {
                                             $fieldDate = $matches[$properties['match']];
                                         } else {
                                             $fieldDate = '';
                                         }
                                     }
+
                                     if (isset($properties['function'])) {
                                         for ($i = 0; $i < count($properties['function']); $i++) {
                                             $function = $properties['function'][$i];
+
                                             if (!empty($properties['parameter'][$i])) {
                                                 $fieldDate = $function($fieldDate, $properties['parameter'][$i]);
                                                 #$fieldDate = $function($fieldDate, MB_CASE_TITLE);
@@ -375,27 +423,34 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
                                             }
                                         }
                                     }
+
                                     if (isset($properties['toReplace']) && isset($properties['replacement'])) {
                                         for ($i = 0; $i < count($properties['toReplace']); $i++) {
-                                            $fieldDate = preg_replace('/' . $properties['toReplace'][$i] . '/', $properties['replacement'][$i], $fieldDate);
+                                            $fieldDate = preg_replace("/{$properties['toReplace'][$i]}/", $properties['replacement'][$i], $fieldDate);
                                         }
                                     }
+
                                     $fieldDate = trim($fieldDate);
                                     if (empty($fieldDate) && $fieldDate !== '0' && $fieldDate !== 0) {
                                         continue;
                                     }
+
                                     $tmpName = $properties['name'] ?? $dataIndex++;
                                     $names = explode('#', $tmpName);
+
                                     foreach ($names as $name) {
                                         if (!isset($data[$name]['data'])) {
                                             $data[$name]['data'] = [];
                                         }
+
                                         $data[$name]['data'][] = $fieldDate;
+
                                         if (empty($solrMarcSpecs['originalletters']) || $solrMarcSpecs['originalletters'] != 'no') {
                                             if (!empty($this->originalLetters[$field][$index][$subfield])) {
                                                 $data[$name]['originalLetters'] = $this->originalLetters[$field][$index][$subfield];
                                             }
                                         }
+
                                         if ($name == $mandatoryField) {
                                             $mandatoryFieldSet = true;
                                         }
@@ -405,22 +460,27 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
 
                         }
                     }
+
                     if (!empty($data)) {
                         $returnData[] = $data;
                     }
                 }
+
                 if (empty($returnData)) {
                     $returnData = $indexData;
                 }
             }
         }
+
         if (!empty($returnData)) {
             $returnData['view-method'] = $solrMarcSpecs['view-method'];
             $returnData['match-key'] = $solrMarcSpecs['match-key'];
 	    }
+
         if (!$mandatoryFieldSet) {
             return [];
         }
+
         return $returnData ?? [];
     }
 
@@ -431,25 +491,30 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      */
     protected function getOriginalLetters() {
         $originalLetters = [];
-        if ($fields = $this->getMarcRecord()->getFields('880')) {
+
+        if ($fields = $this->getMarcReader()->getFields('880')) {
             foreach ($fields as $field) {
-                $subfields = $field->getSubfields();
+                $subfields = $field['subfields'];
                 $letters = [];
+
                 foreach ($subfields as $subfield) {
-                    $code = $subfield->getCode();
+                    $code = $subfield['code'];
+
                     if ($code == '6') {
-                        $index = preg_replace('/-.*$/', '', $subfield->getData());
+                        $index = preg_replace('/-.*$/', '', $subfield['data']);
                     } elseif(!is_numeric($code)) {
-                        $letters[$code] = $subfield->getData();
+                        $letters[$code] = $subfield['data'];
                     }
                 }
+
                 if (isset($originalLetters[$index])) {
-                    $originalLetters[$index][] .= $letters;
+                    $originalLetters[$index][] = $letters;
                 } else {
                     $originalLetters[$index] = [$letters];
                 }
             }
         }
+
         return $originalLetters;
     }
 
@@ -459,18 +524,18 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      * @return string
      */
     public function getMultipartResourceRecordLevel() {
-        $leader = $this->getMarcRecord()->getLeader();
+        $leader = $this->getMarcReader()->getLeader();
         $mrrLevel = strtoupper($leader[19]);
 
         switch ($mrrLevel) {
             case 'A': // Set
-                return "Set";
+                return 'Set';
             case 'B': // Part with independent title
-                return "Part with independent title";
+                return 'Part with independent title';
             case 'C': // Part with dependent title
-                return "Part with dependent title";
+                return 'Part with dependent title';
             default:
-                return "Unknown";
+                return 'Unknown';
         }
     }
 
@@ -528,7 +593,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
             'title_sub' => $rawData['title_sub'] ?? null
         ];
         $formattedData = base64_encode(json_encode($data));
-        
+
         return $formattedData;
     }
 

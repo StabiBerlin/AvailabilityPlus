@@ -3,10 +3,10 @@
     $solrData = $this->driver->formatSolrData();
 ?>
 
-<div class="availabilityItem <?=$this->additionalClass?>" data-full="<?=$solrData?>" data-id="<?=$this->driver->getUniqueID();?>" data-list="<?=$this->list?>" data-src="<?=$this->driver->getSourceIdentifier(); ?>" data-language="<?=$this->layout()->userLang; ?>">
+<div class="availabilityItem <?=$this->additionalClass?>" data-full="<?=$solrData?>" data-id="<?=$this->driver->getUniqueID();?>" data-list="<?=$this->list?>" data-src="<?=$this->driver->getSourceIdentifier(); ?>" data-language="<?=$this->layout()->userLang;?>">
 	<span class="status ajax-availability hidden">
-        <span class="icon--font fa fa-spinner icon--spin" role="img" aria-hidden="true"></span>
-        <?=$this->translate('loading_ellipsis')?>
+        <?=$this->icon('spinner')?>
+        <?=$this->transEsc('loading_ellipsis')?>
 	</span>
     <?php if (!empty($_GET['debug_ap']) && strip_tags($_GET['debug_ap']) == 'true'): ?>
         <div class="delimiter"></div>

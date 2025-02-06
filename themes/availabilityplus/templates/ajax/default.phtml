@@ -1,14 +1,14 @@
 <div class="availability_item">
 	<?php if ($url): ?>
 		<div class="delimiter"></div>
-		<a href="<?=$url?>" class="<?=$level?>" title="<?=$this->transEsc('AvailabilityPlus::'.$label)?>">
-			<?=$this->transEsc('AvailabilityPlus::'.$label)?>
+		<a href="<?=$url?>" class="<?=$level?>" title='<?=$this->transEsc("AvailabilityPlus::{$label}")?>'>
+			<?=$this->transEsc("AvailabilityPlus::{$label}")?>
 		</a>
 		<br/>
 	<?php else: ?>
 		<div class="delimiter"></div>
-		<span class="<?=$level?>" title="<?=$this->transEsc('AvailabilityPlus::'.$label)?>">
-			<?=$this->transEsc('AvailabilityPlus::'.$label)?>
+		<span class="<?=$level?>" title='<?=$this->transEsc("AvailabilityPlus::{$label}")?>'>
+			<?=$this->transEsc("AvailabilityPlus::{$label}")?>
 		</span>
 		<br/>
 	<?php endif; ?>

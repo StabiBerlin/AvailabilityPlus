@@ -19,10 +19,11 @@ class JournalsOnlinePrint extends AvailabilityPlusResolver
     public function getResolverUrl($openUrl) {
         parse_str($openUrl, $this->urlParams);
 	    $this->doi = $this->urlParams['doi'];
-        $url = $this->baseUrl.$openUrl.$this->additionalParams;
-        if (strpos($url, "&pid=client_ip=dynamic") !== false) {
+        $url = "{$this->baseUrl}{$openUrl}{$this->additionalParams}";
+
+        if (strpos($url, '&pid=client_ip=dynamic') !== false) {
             $ip = $_SERVER['REMOTE_ADDR'];
-            $url = str_replace("&pid=client_ip=dynamic","&pid=client_ip=".$ip, $url);
+            $url = str_replace('&pid=client_ip=dynamic', "&pid=client_ip={$ip}", $url);
         }
 
         $url = $this->fixIssnFormat($url);
@@ -50,18 +51,18 @@ class JournalsOnlinePrint extends AvailabilityPlusResolver
     }
 
     public function fixIssnFormat($url) {
-        preg_match('/(?<=issn=).*?(?=&)/', $url, $issn); // The "positive lookbehind" feature may not be supported in all browsers.  => issn=(.*?)(?=&)
+        preg_match('/(?<=issn=).*?(?=&)/', $url, $issn); // The 'positive lookbehind' feature may not be supported in all browsers.  => issn=(.*?)(?=&)
         $currentIssn = $issn[0];
 
         if (!empty($currentIssn)) {
             $length = strlen($currentIssn);
-            
+
             if ($length == 8) {
-                $newIssn = substr($currentIssn, 0, 4).'-'. substr($currentIssn, 4, $length - 4);
+                $newIssn = substr($currentIssn, 0, 4) . '-' . substr($currentIssn, 4, $length - 4);
             } else {
                 $newIssn = $currentIssn;
             }
-    
+
             return str_replace($currentIssn, $newIssn, $url);
         } else {
             return $url;

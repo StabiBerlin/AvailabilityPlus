@@ -31,9 +31,11 @@ class AvailabilityPlusController extends \VuFind\Controller\AbstractBase
         if ($force || !is_object($this->driver)) {
             $recordLoader = $this->getRecordLoader();
             $cacheContext = $this->getRequest()->getQuery()->get('cacheContext');
+
             if (isset($cacheContext)) {
                 $recordLoader->setCacheContext($cacheContext);
             }
+
             $this->driver = $recordLoader->load(
                 $this->params()->fromRoute('id', $this->params()->fromQuery('id')),
                 $source,
@@ -41,6 +43,7 @@ class AvailabilityPlusController extends \VuFind\Controller\AbstractBase
                 $params
             );
         }
+
         return $this->driver;
     }
 
@@ -60,6 +63,7 @@ class AvailabilityPlusController extends \VuFind\Controller\AbstractBase
     public function debugAction() {
         $source = $this->params()->fromQuery('source') ?? 'Solr';
         $driver = $this->loadRecordDriver(null, false, $source);
+
         return $this->createViewModel(['driver' => $driver]);
     }
 }

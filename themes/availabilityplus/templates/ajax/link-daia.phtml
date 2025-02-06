@@ -34,8 +34,8 @@
                         <span class="storage_prefix">
                             <?=$this->transEsc('AvailabilityPlus::department')?>:
                         </span>
-                        <a href="<?=$result['storage']['url']?>" class="<?=$result['storage']['level']?>" title="<?=$this->transEsc('AvailabilityPlus::'.$result['storage']['label'])?>" target="_blank">
-                            <?=$this->transEsc('AvailabilityPlus::'.$result['storage']['label'])?>
+                        <a href="<?=$result['storage']['url']?>" class="<?=$result['storage']['level']?>" title='<?=$this->transEsc("AvailabilityPlus::{$result['storage']['label']}")?>' target="_blank">
+                            <?=$this->transEsc("AvailabilityPlus::{$result['storage']['label']}")?>
                         </a>
                     </span>
                 <?php else: ?>
@@ -43,7 +43,7 @@
                         <span class="storage_prefix">
                             <?=$this->transEsc('AvailabilityPlus::department')?>:
                         </span>
-                        <?=$this->transEsc('AvailabilityPlus::'.$result['storage']['label'])?>
+                        <?=$this->transEsc("AvailabilityPlus::{$result['storage']['label']}")?>
                     </span>
                 <?php endif; ?>
             <?php endif; ?>
@@ -61,7 +61,7 @@
         <?php if (!empty($result['daia_hint'])): ?>
             <span class="daia_hint">
                 <span class="<?=$result['daia_hint']['level']?>">
-                    <?=$this->transEsc('AvailabilityPlus::'.$result['daia_hint']['label'])?>
+                    <?=$this->transEsc("AvailabilityPlus::{$result['daia_hint']['label']}")?>
                     <?php if (!empty($result['daia_hint']['label_date'])): ?>
                         <?=$result['daia_hint']['label_date']?>
                     <?php endif; ?>
@@ -76,12 +76,12 @@
         <?php if (!empty($result['daia_action'])): ?>
             <?php if (!empty($result['daia_action']['url'])): ?>
                 <span class="daia_action">
-                    <a href="<?=$result['daia_action']['url']?>" class="<?=$result['daia_action']['level']?> link_external" title="<?=$this->transEsc('AvailabilityPlus::'.$result['daia_action']['label'])?>" target="_blank">
-                        <?=$this->transEsc('AvailabilityPlus::'.$result['daia_action']['label'])?>
+                    <a href="<?=$result['daia_action']['url']?>" class="<?=$result['daia_action']['level']?> link_external" title='<?=$this->transEsc("AvailabilityPlus::{$result['daia_action']['label']}")?>' target="_blank">
+                        <?=$this->transEsc("AvailabilityPlus::{$result['daia_action']['label']}")?>
                     </a>
                 </span>
             <?php else: ?>
-                <span class="daia_action"><?=$this->transEsc('AvailabilityPlus::'.$result['daia_action']['label'])?></span>
+                <span class="daia_action"><?=$this->transEsc("AvailabilityPlus::{$result['daia_action']['label']}")?></span>
             <?php endif; ?>
         <?php endif; ?>
 
@@ -89,24 +89,24 @@
             <div class="daia_further_information">
                 <?php if (!empty($result['queue'])): ?>
                     <div class="service_queue">
-                        <?=$result['queue']['length']?> <?=$this->transEsc('AvailabilityPlus::'.$result['queue']['label'])?>
+                        <?=$result['queue']['length']?> <?=$this->transEsc("AvailabilityPlus::{$result['queue']['label']}")?>
                     </div>
                 <?php endif; ?>
-        
+
                 <?php if (!empty($result['about'])): ?>
                     <?php if ($mediatype == 'Journal'): ?>
                         <div class="item_about">
                             <span class="item_about_prefix"><?=$this->transEsc('AvailabilityPlus::volume_issue')?>: </span>
-                            <?=str_replace("<br />",". - ", nl2br($result['about']))?>
+                            <?=str_replace('<br />', '. - ', nl2br($result['about']))?>
                         </div>
                     <?php else: ?>
                         <div class="item_about">
                             <span class="item_about_prefix"><?=$this->transEsc('AvailabilityPlus::item_about')?>: </span>
-                            <?=str_replace("<br />",". - ", nl2br($result['about']))?>
+                            <?=str_replace('<br />', '. - ', nl2br($result['about']))?>
                         </div>
-                    <?php endif; ?>        
+                    <?php endif; ?>
                 <?php endif; ?>
-        
+
                 <?php if (!empty($result['chronology'])): ?>
                     <div class="item_chronology">
                         <span class="item_chronology_prefix"><?=$this->transEsc('AvailabilityPlus::Inventory Information')?>: </span>
@@ -115,9 +115,9 @@
                 <?php endif; ?>
             </div>
         <?php endif; ?>
-        
+
         <?php if (!empty($result['order_hint'])): ?>
-            <div class="order_hint"><?=$this->transEsc('AvailabilityPlus::'.$result['order_hint'])?></div>
+            <div class="order_hint"><?=$this->transEsc("AvailabilityPlus::{$result['order_hint']}")?></div>
         <?php endif; ?>
     </div>
 
