@@ -78,6 +78,5 @@ The Debug-Tool was developed to display detailed information about which availab
 - [ ] rework MARC configuration in [local/config/vufind/availabilityplus.yaml](local/config/vufind/availabilityplus.yaml) to be more generic, currently it is based on the MARC structure used by [K10plus-Zentral](https://github.com/gbv/findex-config/tree/master/SolrCloud)
 - [ ] Rework DAIA configuration and move grouping from templates to DAIA-Resolver
 - [ ] Change Resolver interface to allow for providing MARC-Data for configuration or rules based on MARC-Data
-- [ ] Add A+ parsing for SFX-Resolver
 - [ ] Add CrossRef to get DOIs to pass on to Unpaywall
 - [ ] rework backend/source/driver handling to make sure it can be used with different backends, although at this point, the module will not work with backends not providing MARC-Data

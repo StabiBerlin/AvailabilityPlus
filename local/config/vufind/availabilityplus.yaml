@@ -427,6 +427,27 @@ DAIAParent:
     w:
       - [name, id]
       - [replace, '\(DE-627\)([0-9xX]+)', 'ppn:$1']
+SFX:
+  category: resolver
+  view-method: ajax/link-sfx.phtml
+  mandatory-field: issn
+  '022':
+    a:
+      - [name, issn]
+  773:
+    t:
+      - [name, title]
+    x:
+      - [name, issn]
+  952:
+    d:
+      - [name, volume]
+    j:
+      - [name, date]
+    e:
+      - [name, issue]
+    h:
+      - [name, pages]
 Unpaywall:
   category: resolver
   view-method: ajax/link-unpaywall.phtml
