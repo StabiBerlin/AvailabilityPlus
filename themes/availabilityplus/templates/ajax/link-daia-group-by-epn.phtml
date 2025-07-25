@@ -46,7 +46,7 @@
         $overlay = false;
         $overlay_label = 'no_overlay';
     ?>
-    <?php if ($resolverConfig['overlay'] && $group_label !== 'undefined' && (sizeof($group_items) >= $resolverConfig['overlay_min_count'] || (!$list && $resolverConfig['always_display_overlay_in_record_view']))): ?>
+    <?php if ($resolverConfig['overlay'] && $group_label !== 'undefined' && (sizeof($group_items) >= $resolverConfig['overlay_min_count'] || (!$this->list && $resolverConfig['always_display_overlay_in_record_view']))): ?>
         <?php
             $overlay = true;
             $overlay_label = 'overlay_used';
@@ -101,7 +101,7 @@
                 </div>
             <?php endif; ?>
 
-            <?php if ($list): ?>
+            <?php if ($this->list): ?>
                 <div class="additional_copies">
                     <a href="<?=$this->url('home')?><?=$recordRoute?>/<?=$id?>"><?=$this->transEsc('AvailabilityPlus::additional_copies')?>...</a>
                 </div>
@@ -126,7 +126,7 @@
     <?php foreach ($group_items as $key => $result): ?>
         <?php if (!empty($result)): ?>
             <div class="delimiter"></div>
-            <?php if (!$list): ?>
+            <?php if (!$this->list): ?>
                 <div class="daia_item">
             <?php endif; ?>
         <?php endif; ?>
@@ -189,7 +189,7 @@
                 </span>
             <?php endif; ?>
         <?php endif; ?>
-        <?php if (!$list): ?>
+        <?php if (!$this->list): ?>
             <?php if (!empty($result['queue'])): ?>
                 <div class="service_queue">
                     <?=$result['queue']['length']?>
@@ -213,12 +213,12 @@
             <div class="order_hint"><?=$this->transEsc("AvailabilityPlus::{$result['order_hint']}")?></div>
         <?php endif; ?>
         <?php if (!empty($result)): ?>
-            <?php if ($list && count($data['document'][0]['item']) > 1 && !empty($result['storage'])): ?>
+            <?php if ($this->list && count($data['document'][0]['item']) > 1 && !empty($result['storage'])): ?>
                 <div class="additional_copies">
                     <a href="<?=$this->url('home')?><?=$recordRoute?>/<?=$id?>"><?=$this->transEsc('AvailabilityPlus::additional_copies')?>...</a>
                 </div>
             <?php endif; ?>
-            <?php if (!$list): ?>
+            <?php if (!$this->list): ?>
                 </div>
             <?php endif; ?>
         <?php endif; ?>

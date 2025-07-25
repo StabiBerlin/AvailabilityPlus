@@ -32,8 +32,7 @@ class SolrDefaultFactory extends \VuFind\RecordDriver\AbstractBaseFactory
     ) {
         $searchConfig = $container->get('VuFind\Config\PluginManager')->get('searches');
         $solrMarcYaml = 'solrmarc.yaml';
-        $finalOptions = [null, $searchConfig, $solrMarcYaml];
-        $driver = parent::__invoke($container, $requestedName, $finalOptions);
+        $driver = parent::__invoke($container, $requestedName, [null, $searchConfig, $solrMarcYaml, ...($options ?: [])]);
         $driver->attachSearchService($container->get('VuFindSearch\Service'));
         return $driver;
     }

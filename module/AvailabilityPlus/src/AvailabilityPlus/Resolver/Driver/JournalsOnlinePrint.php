@@ -18,7 +18,7 @@ class JournalsOnlinePrint extends AvailabilityPlusResolver
      */
     public function getResolverUrl($openUrl) {
         parse_str($openUrl, $this->urlParams);
-	    $this->doi = $this->urlParams['doi'];
+	    $this->doi = $this->urlParams['doi'] ?? '';
         $url = "{$this->baseUrl}{$openUrl}{$this->additionalParams}";
 
         if (strpos($url, '&pid=client_ip=dynamic') !== false) {
@@ -26,7 +26,9 @@ class JournalsOnlinePrint extends AvailabilityPlusResolver
             $url = str_replace('&pid=client_ip=dynamic', "&pid=client_ip={$ip}", $url);
         }
 
-        $url = $this->fixIssnFormat($url);
+        if (str_contains($url, 'issn')) {
+            $url = $this->fixIssnFormat($url);
+        }
 
         return $url;
     }

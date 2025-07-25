@@ -16,15 +16,18 @@ class JournalsOnlinePrintElectronic extends JournalsOnlinePrint
     public function parseLinks($data_org) {
         $urls = []; // to check for duplicate urls
         $records = []; // array to return
+        $results = [];
         $freeAccess = false;
         $licensedAccess = false;
         $data = @simplexml_load_string($data_org, 'SimpleXMLElement', LIBXML_NOCDATA);
         $data = json_decode(json_encode($data), true);
 
-        if (array_key_exists('@attributes', $data['Full']['ElectronicData']['ResultList']['Result'])) {
-            $results = $data['Full']['ElectronicData']['ResultList'];
-        } else {
-            $results = $data['Full']['ElectronicData']['ResultList']['Result'];
+        if (!empty($data['Full']['ElectronicData']['ResultList'])) {
+            if (array_key_exists('@attributes', $data['Full']['ElectronicData']['ResultList']['Result'])) {
+                $results = $data['Full']['ElectronicData']['ResultList'];
+            } else {
+                $results = $data['Full']['ElectronicData']['ResultList']['Result'];
+            }
         }
 
         foreach ($results as $result) {

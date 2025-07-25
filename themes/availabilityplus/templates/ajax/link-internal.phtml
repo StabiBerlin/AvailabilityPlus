@@ -1,5 +1,5 @@
 <?php if ($url): ?>
-	<?php if (!$list): ?>
+	<?php if (!$this->list): ?>
 		<div class="availability_item">
 	<?php endif; ?>
 		<div class="delimiter"></div>
@@ -7,7 +7,7 @@
 			<?=$this->transEsc("AvailabilityPlus::{$label}")?>
 		</a>
 		<br/>
-	<?php if (!$list): ?>
+	<?php if (!$this->list): ?>
 		</div>
 	<?php endif; ?>
 <?php endif; ?>

@@ -135,18 +135,19 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses implements Tra
                 $response['id'] = $id;
                 $response['mediatype'] = $mediatype;
                 $response['checkRoute'] = $this->checkRoute;
-                $response['checks'] = $this->checks;
+                $response['checks'] = $this->checks->toArray();
                 $responses[] = $response;
             } catch (\Exception $e) {
-                $result['check'] = 'Exception';
-                $result['error'] = $e;
+                $result = $this->generateResponse($check ?? 'EXCEPTION', $check ?? 'EXCEPTION', 'EXCEPTION', 'EXCEPTION', '', '', 'EXCEPTION');
+                $result = ['error' => $e->getMessage()] + $result;
                 if ($this->debug) {
                     $result['html'] = $this->applyTemplate('ajax/debug.phtml', ['debug' => $result]);
                 }
                 $response[] = $result;
                 $response['id'] = $id;
-                $mediatype = 'cannot be determined due to exception';
-                $this->checkRoute = 'cannot be determined due to exception';
+                $response['mediatype'] = 'cannot be determined due to exception';
+                $response['checkRoute'] = $this->checkRoute;
+                $response['checks'] = $this->checks->toArray();
                 $responses[] = $response;
             }
         }
@@ -519,7 +520,7 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses implements Tra
                 $response['list'] = $this->list;
                 $response['html'] = $this->applyTemplate($template, $response);
                 $response['resolver_rule_file'] = $resolverHandler->getRulesFile();
-                $response = ['error' => $e] + $response;
+                $response = ['error' => $e->getMessage()] + $response;
                 $responses[] = $response;
 
                 return $responses;

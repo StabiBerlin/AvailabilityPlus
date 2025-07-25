@@ -1,6 +1,6 @@
-<?php foreach ($data as $result): ?>
+<?php foreach ($data ?? [] as $result): ?>
     <?php if (!empty($result['label'])): ?>
-        <?php if (!$list): ?>
+        <?php if (!$this->list): ?>
             <div class="availability_item">
         <?php endif; ?>
             <?php
@@ -13,7 +13,7 @@
                 <?=$this->transEsc("AvailabilityPlus::{$label}")?>
             </a>
             <br/>
-        <?php if (!$list): ?>
+        <?php if (!$this->list): ?>
             </div>
         <?php endif; ?>
         <?php if ($mode == 'break_on_first') break; ?>

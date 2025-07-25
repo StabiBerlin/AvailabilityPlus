@@ -53,9 +53,7 @@ class SolrMarc extends \VuFind\RecordDriver\SolrMarc
      * @param \Laminas\Config\Config $searchSettings Search-specific configuration file
      * @param string $marcYaml
      */
-    public function __construct($mainConfig = null, $recordConfig = null,
-        $searchSettings = null, $solrMarcYaml = null
-    ) {
+    public function __construct($mainConfig = null, $recordConfig = null, $searchSettings = null, $solrMarcYaml = null) {
         $this->addSolrMarcYaml($solrMarcYaml, false);
         parent::__construct($mainConfig, $recordConfig, $searchSettings);
     }

@@ -1,5 +1,5 @@
-<?php 
-    $items = $data['document'][0];
+<?php
+    $items = $data['document'][0] ?? ['item' => []];
     $showAdditionalCopies = false;
 ?>
 
@@ -20,7 +20,7 @@
     <?php endif; ?>
 
     <?php if (!empty($result)): ?>
-        <?php if (!$list): ?>
+        <?php if (!$this->list): ?>
             <div class="daia_item">
         <?php endif; ?>
         <div class="delimiter"></div>
@@ -85,7 +85,7 @@
             <?php endif; ?>
         <?php endif; ?>
 
-        <?php if (!$list): ?>
+        <?php if (!$this->list): ?>
             <div class="daia_further_information">
                 <?php if (!empty($result['queue'])): ?>
                     <div class="service_queue">
@@ -122,7 +122,7 @@
     </div>
 
     <?php if (!empty($result)): ?>
-        <?php if ($list && count($data['document'][0]['item']) > 1 && !empty($result['storage']) && $showAdditionalCopies): ?>
+        <?php if ($this->list && count($data['document'][0]['item']) > 1 && !empty($result['storage']) && $showAdditionalCopies): ?>
             <?php if ($this->source == 'Search2'): ?>
                 <?php $recordRoute = 'Search2Record'; ?>
             <?php else: ?>
@@ -136,7 +136,7 @@
             </div>
         <?php endif; ?>
 
-        <?php if (!$list): ?>
+        <?php if (!$this->list): ?>
             </div>
         <?php endif; ?>
     <?php endif; ?>
