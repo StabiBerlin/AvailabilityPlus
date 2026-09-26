@@ -16,7 +16,7 @@ class Unpaywall extends AvailabilityPlusResolver
         $doi = str_replace('?doi=','',$params);
         if ($doi) $url = "{$this->baseUrl}/{$doi}?is_oa=boolean{$this->additionalParams}";
 
-        return $url;
+        return $url ?? '';
     }
 
     /**

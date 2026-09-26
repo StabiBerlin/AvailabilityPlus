@@ -438,21 +438,21 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses implements Tra
             }
         }
 
-        $response['parentId'] = $parentId;
+        $response['parentId'] = $parentId ?? '';
 
-        if (!empty($parentId)) {
+        if (!empty($response['parentId'])) {
             try {
-                $parentDriver = $this->recordLoader->load($parentId, 'Solr');
-                $ilnMarcSpecs = $parentDriver->getSolrMarcSpecs('ILN');
-                $ilnMatch = $parentDriver->getMarcData('ILN');
+                $parentDriver = $this->recordLoader->load($response['parentId'], 'Solr');
+                $response['ilnMarcSpecs'] = $parentDriver->getSolrMarcSpecs('ILN');
+                $response['ilnMatch'] = $parentDriver->getMarcData('ILN');
 
-                if (empty($ilnMatch)) {
-                    $ilnMarcSpecs = $this->driver->getSolrMarcSpecs('ILN');
-                    $ilnMatch = $this->driver->getMarcData('ILN');
+                if (empty($response['ilnMatch'])) {
+                    $response['ilnMarcSpecs'] = $this->driver->getSolrMarcSpecs('ILN');
+                    $response['ilnMatch'] = $this->driver->getMarcData('ILN');
                 }
 
-                if (!empty($ilnMatch[0]['iln']['data'][0])) {
-                    $url = "/Record/{$parentId}";
+                if (!empty($response['ilnMatch'][0]['iln']['data'][0])) {
+                    $url = "/Record/{$response['parentId']}";
                 }
             } catch (\Exception $e) {
                 $url = '';
@@ -466,8 +466,6 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses implements Tra
             $response['html'] = $this->renderer->render($template , $response);
         }
 
-        $response['ilnMarcSpecs'] = $ilnMarcSpecs;
-        $response['ilnMatch'] = $ilnMatch;
         $responses[] = $response;
 
         return $responses;
