@@ -432,7 +432,7 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses implements Tra
         $response = $this->generateResponse($check, 'ArticleParentId', '', '', $template, '', $check_type, '', false);
 
         foreach ($parentData as $parentDate) {
-            if (!empty(($parentDate['id']['data'][0]))) {
+            if (isset($parentDate['id']['data'][0])) {
                 $parentId = $parentDate['id']['data'][0];
                 break;
             }
