@@ -268,7 +268,7 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses implements Tra
                 $template = $this->getTemplate($data);
 
                 foreach ($data as $date) {
-                    if (!empty($date['url']['data'][0])) {
+                    if (isset($date['url']['data'][0])) {
                         foreach ($date['url']['data'] as $url) {
                             $url = str_replace('[path]', $this->urlHelper->fromRoute('home'), $url);
 
@@ -432,7 +432,7 @@ class GetItemStatuses extends \VuFind\AjaxHandler\GetItemStatuses implements Tra
         $response = $this->generateResponse($check, 'ArticleParentId', '', '', $template, '', $check_type, '', false);
 
         foreach ($parentData as $parentDate) {
-            if (!empty(($parentDate['id']['data'][0]))) {
+            if (isset($parentDate['id']['data'][0])) {
                 $parentId = $parentDate['id']['data'][0];
                 break;
             }
